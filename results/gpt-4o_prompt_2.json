@@ -1,0 +1,33 @@
+{
+  "Entities": {
+    "EMPLOYEE": {
+      "attributes": ["Fname", "Minit", "Lname", "Ssn", "Bdate", "Address", "Sex", "Salary"],
+      "pk": ["Ssn"],
+      "fk": ["Super_ssn", "Dno"]
+    },
+    "DEPARTMENT": {
+      "attributes": ["Name", "Number", "Locations"],
+      "pk": ["Number"],
+      "fk": ["Mgr_ssn"]
+    },
+    "PROJECT": {
+      "attributes": ["Name", "Number", "Location"],
+      "pk": ["Number"],
+      "fk": ["Dnum"]
+    },
+    "DEPENDENT": {
+      "attributes": ["Name", "Sex", "Birth_date", "Relationship", "Essn"],
+      "pk": ["Essn", "Name"]
+    },
+    "WORKS_ON": {
+      "attributes": ["Essn", "Pno", "Hours"],
+      "pk": ["Essn", "Pno"],
+      "fk": ["Essn", "Pno"]
+    },
+    "MANAGES": {
+      "attributes": ["Mgr_ssn", "Start_date"],
+      "pk": ["Mgr_ssn"],
+      "fk": ["Mgr_ssn", "Dnumber"]
+    }
+  }
+}

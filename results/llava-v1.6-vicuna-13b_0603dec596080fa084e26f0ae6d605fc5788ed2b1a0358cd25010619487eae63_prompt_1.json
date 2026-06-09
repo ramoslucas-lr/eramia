@@ -1,0 +1,39 @@
+{
+ "Entities": {
+   "Employee": {
+     "attributes": ["id", "name", "address", "salary", "start_date", "number_of_employees", "department_id"],
+     "pk": ["id"],
+     "fk": ["department_id"]
+   },
+   "Department": {
+     "attributes": ["id", "name", "number_of_employees", "controlling_department_id"],
+     "pk": ["id"],
+     "fk": ["controlling_department_id"]
+   },
+   "Manager": {
+     "attributes": ["id", "name", "department_id", "works_on", "number_of_employees"],
+     "pk": ["id"],
+     "fk": ["department_id"]
+   },
+   "Supervisor": {
+     "attributes": ["id", "name", "department_id", "works_on", "number_of_employees"],
+     "pk": ["id"],
+     "fk": ["department_id"]
+   },
+   "Works_ON": {
+     "attributes": ["id", "employee_id", "project_id"],
+     "pk": ["id"],
+     "fk": ["employee_id", "project_id"]
+   },
+   "Project": {
+     "attributes": ["id", "name", "location", "number"],
+     "pk": ["id"],
+     "fk": ["number"]
+   },
+   "Dependencies_OF": {
+     "attributes": ["id", "dependent_id", "name", "sex", "birth_date", "relationship"],
+     "pk": ["id"],
+     "fk": ["dependent_id"]
+   }
+ }
+}
