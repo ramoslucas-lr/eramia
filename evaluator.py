@@ -2,7 +2,7 @@ import os
 import json
 import re
 
-GROUND_TRUTH_PATH = "ground_truth.json"
+GROUND_TRUTH_PATH = "data/ground_truth.json"
 RESULTS_DIR = "results"
 
 def load_json(filepath):
@@ -46,6 +46,11 @@ def extract_elements(schema):
         attrs = details.get("attributes", [])
         epks = details.get("pk", [])
         efks = details.get("fk", [])
+        
+        # Converte para lista caso o LLM retorne uma string solta (ex: "pk": "Ssn")
+        if isinstance(attrs, str): attrs = [attrs]
+        if isinstance(epks, str): epks = [epks]
+        if isinstance(efks, str): efks = [efks]
         
         if isinstance(attrs, list):
             for a in attrs:
