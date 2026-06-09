@@ -1,33 +1,97 @@
 {
- "Entities": {
-   "Employee": {
-     "attributes": ["ID", "Name", "Address", "Salary", "Start_date", "Number_of_employees"],
-     "pk": ["ID"],
-     "fk": ["Department_ID"]
-   },
-   "Department": {
-     "attributes": ["Department_ID", "Name", "Location"],
-     "pk": ["Department_ID"],
-     "fk": ["Employee_ID"]
-   },
-   "Manager": {
-     "attributes": ["ID", "Name", "Address", "Salary", "Start_date", "Number_of_employees"],
-     "pk": ["ID"],
-     "fk": ["Department_ID"]
-   },
-   "Supervisor": {
-     "attributes": ["ID", "Name", "Address", "Salary", "Start_date", "Number_of_employees"],
-     "pk": ["ID"],
-     "fk": ["Employee_ID"]
-   },
-   "Works_ON": {
-     "attributes": ["ID", "Employee_ID", "Works_ON_ID", "Works_ON_ID", "Name", "Number"],
-     "pk": ["ID"],
-     "fk": ["Employee_ID"]
-   },
-   "Dependents_OF": {
-     "attributes": ["ID", "Name", "Relationship", "Birthdate", "Address", "Number"],
-     "pk": ["ID"],
-     "fk": ["Employee_ID"]
-   }
- }
+  "Entities": {
+    "Employee": {
+      "attributes": [
+        "ID",
+        "Name",
+        "Address",
+        "Salary",
+        "Start_date",
+        "Number_of_employees"
+      ],
+      "pk": [
+        "ID"
+      ],
+      "fk": [
+        "Department_ID"
+      ]
+    },
+    "Department": {
+      "attributes": [
+        "Department_ID",
+        "Name",
+        "Location"
+      ],
+      "pk": [
+        "Department_ID"
+      ],
+      "fk": [
+        "Employee_ID"
+      ]
+    },
+    "Manager": {
+      "attributes": [
+        "ID",
+        "Name",
+        "Address",
+        "Salary",
+        "Start_date",
+        "Number_of_employees"
+      ],
+      "pk": [
+        "ID"
+      ],
+      "fk": [
+        "Department_ID"
+      ]
+    },
+    "Supervisor": {
+      "attributes": [
+        "ID",
+        "Name",
+        "Address",
+        "Salary",
+        "Start_date",
+        "Number_of_employees"
+      ],
+      "pk": [
+        "ID"
+      ],
+      "fk": [
+        "Employee_ID"
+      ]
+    },
+    "Works_ON": {
+      "attributes": [
+        "ID",
+        "Employee_ID",
+        "Works_ON_ID",
+        "Works_ON_ID",
+        "Name",
+        "Number"
+      ],
+      "pk": [
+        "ID"
+      ],
+      "fk": [
+        "Employee_ID"
+      ]
+    },
+    "Dependents_OF": {
+      "attributes": [
+        "ID",
+        "Name",
+        "Relationship",
+        "Birthdate",
+        "Address",
+        "Number"
+      ],
+      "pk": [
+        "ID"
+      ],
+      "fk": [
+        "Employee_ID"
+      ]
+    }
+  }
+}
