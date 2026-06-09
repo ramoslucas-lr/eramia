@@ -1,0 +1,52 @@
+{
+  "Entities": {
+    "EMPLOYEE": {
+      "attributes": ["Ssn", "Fname", "Minit", "Lname", "Bdate", "Address", "Sex", "Salary"],
+      "pk": ["Ssn"]
+    },
+    "DEPARTMENT": {
+      "attributes": ["Dnumber", "Dname", "Locations"],
+      "pk": ["Dnumber"]
+    },
+    "PROJECT": {
+      "attributes": ["Pnumber", "Pname", "Plocation", "Dnumber"],
+      "pk": ["Pnumber"],
+      "fk": ["Dnumber"]
+    },
+    "DEPENDENT": {
+      "attributes": ["Essn", "Dependent_name", "Sex", "Birth_date", "Relationship"],
+      "pk": ["Essn", "Dependent_name"],
+      "fk": ["Essn"]
+    },
+    "WORKS_FOR": {
+      "attributes": ["Ssn", "Dnumber", "Start_date"],
+      "pk": ["Ssn", "Dnumber"],
+      "fk": ["Ssn", "Dnumber"]
+    },
+    "MANAGES": {
+      "attributes": ["Mssn", "Dnumber"],
+      "pk": ["Mssn", "Dnumber"],
+      "fk": ["Mssn", "Dnumber"]
+    },
+    "WORKS_ON": {
+      "attributes": ["Essn", "Pnumber", "Hours"],
+      "pk": ["Essn", "Pnumber"],
+      "fk": ["Essn", "Pnumber"]
+    },
+    "CONTROLS": {
+      "attributes": ["Dnumber", "Pnumber"],
+      "pk": ["Dnumber", "Pnumber"],
+      "fk": ["Dnumber", "Pnumber"]
+    },
+    "SUPERVISION": {
+      "attributes": ["Supervisor_ssn", "Supervisee_ssn"],
+      "pk": ["Supervisor_ssn", "Supervisee_ssn"],
+      "fk": ["Supervisor_ssn", "Supervisee_ssn"]
+    },
+    "LOCATIONS": {
+      "attributes": ["Dnumber", "Location_name"],
+      "pk": ["Dnumber", "Location_name"],
+      "fk": ["Dnumber"]
+    }
+  }
+}

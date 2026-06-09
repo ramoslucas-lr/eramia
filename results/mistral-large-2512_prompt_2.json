@@ -1,0 +1,34 @@
+{
+  "Entities": {
+    "EMPLOYEE": {
+      "attributes": ["Ssn", "Fname", "Minit", "Lname", "Bdate", "Address", "Sex", "Salary", "Supervisor_Ssn", "Department_Number"],
+      "pk": ["Ssn"],
+      "fk": ["Supervisor_Ssn", "Department_Number"]
+    },
+    "DEPARTMENT": {
+      "attributes": ["Number", "Name", "Locations", "Manager_Ssn", "Start_date", "Number_of_employees", "Controlling_Department_Number"],
+      "pk": ["Number"],
+      "fk": ["Manager_Ssn", "Controlling_Department_Number"]
+    },
+    "PROJECT": {
+      "attributes": ["Number", "Name", "Location", "Controlling_Department_Number"],
+      "pk": ["Number"],
+      "fk": ["Controlling_Department_Number"]
+    },
+    "DEPENDENT": {
+      "attributes": ["Employee_Ssn", "Name", "Sex", "Birth_date", "Relationship"],
+      "pk": ["Employee_Ssn", "Name"],
+      "fk": ["Employee_Ssn"]
+    },
+    "WORKS_ON": {
+      "attributes": ["Employee_Ssn", "Project_Number", "Hours"],
+      "pk": ["Employee_Ssn", "Project_Number"],
+      "fk": ["Employee_Ssn", "Project_Number"]
+    },
+    "SUPERVISION": {
+      "attributes": ["Supervisor_Ssn", "Supervisee_Ssn"],
+      "pk": ["Supervisor_Ssn", "Supervisee_Ssn"],
+      "fk": ["Supervisor_Ssn", "Supervisee_Ssn"]
+    }
+  }
+}
