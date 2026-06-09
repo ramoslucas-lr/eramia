@@ -10,7 +10,7 @@ Gpt (1).ipynb
 
 The Entity-Relationship Diagram is provided as an image file (PNG):
 
-ERD (1).png
+ERD.png
 
 The document with the model comparison and results:
 
