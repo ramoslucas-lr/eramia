@@ -51,7 +51,7 @@ Foram elaborados dois prompts distintos:
 * **Prompt 2 (Raciocínio Guiado):** Fornece regras explícitas de mapeamento de cardinalidade (1:1, 1:N, N:N) baseadas em Elmasri & Navathe.
 
 **Desafios Encontrados:** Modelos de fronteira e *open-weights* apresentaram forte viés para conversação, formatação Markdown indesejada e injeção de *Chain of Thought* (raciocínio passo a passo), o que frequentemente estrapolava limites de tokens (causando truncamento) e quebrava o parser JSON.
-**Solução:** Implementamos restrições drásticas no *System Prompt* (`"Você NÃO PODE explicar seu raciocínio"`), adequação da amostragem termodinâmica (`temperature=0.01` para evitar loops de decodificação na OpenRouter/Replicate) e aumento da janela de contexto de saída (`max_tokens=4000`). Adicionou-se também uma função de sanitização via *Regex* no script de execução (`clean_json_output`) para extrair exclusivamente o bloco estruturado, garantindo parseabilidade total.
+**Solução:** Implementamos restrições drásticas no *System Prompt* (`"Você NÃO PODE explicar seu raciocínio"`), adequação da amostragem termodinâmica (`temperature=0` para assegurar o maior determinismo possível) e aumento da janela de contexto de saída (`max_tokens=4000`). Adicionou-se também uma função de sanitização via *Regex* no script de execução (`clean_json_output`) para extrair exclusivamente o bloco estruturado, garantindo parseabilidade total.
 
 ### 3.4. Auditoria Metodológica e Emparelhamento Semântico
 Para garantir a reprodutibilidade impecável ("maçãs com maçãs") em relação aos números do Hudson, foi necessário emular as condições de correção literária:
