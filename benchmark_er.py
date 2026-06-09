@@ -2,6 +2,9 @@ import os
 import base64
 import json
 import time
+import argparse
+import replicate
+from openai import OpenAI
 from dotenv import load_dotenv
 
 # Carrega variáveis do arquivo .env
@@ -13,18 +16,26 @@ load_dotenv()
 
 # Modelos via OpenRouter
 OPENROUTER_MODELS = [
-    "qwen/qwen-3-vl-235b", # SOTA Oriental
+    "qwen/qwen3-vl-235b-a22b-instruct", # SOTA Oriental
     "meta-llama/llama-3.2-11b-vision-instruct", # SOTA Ocidental
-    "mistralai/ministral-14b-2512" # Eficiência
+    "mistralai/ministral-14b-2512", # Eficiência
+    "mistralai/mistral-large-2512",
+    "google/gemini-3.5-flash",
+    "anthropic/claude-opus-4.8",
+    "anthropic/claude-opus-4.1",
+    "openai/gpt-5.5",
+    "openai/gpt-4o",
+    "google/gemini-2.5-flash"
 ]
 
 # Modelos via Replicate
 REPLICATE_MODELS = [
     # LLaVA v1.6 34B
-    "yorickvp/llava-v1.6-34b:41ecfbfb36d247cd4926f50b44128532f8115eb5b23d537f5b8429ab78709f19" 
+    "yorickvp/llava-v1.6-vicuna-13b:0603dec596080fa084e26f0ae6d605fc5788ed2b1a0358cd25010619487eae63" 
+    # "yorickvp/llava-v1.6-34b"
 ]
 
-IMAGE_PATH = "ERD (1).png"
+IMAGE_PATH = "data/ERD.png"
 OUTPUT_DIR = "results"
 
 # =====================
@@ -53,7 +64,8 @@ PROMPT_1 = (
     "      \"pk\": [\"m\"]\n"
     "    }\n"
     "  }\n"
-    "}"
+    "}\n\n"
+    "INSTRUÇÃO CRÍTICA: A sua resposta DEVE ser APENAS um objeto JSON válido e nada mais. O PRIMEIRO caractere da sua resposta deve ser '{' e o ÚLTIMO caractere deve ser '}'. Certifique-se de fechar TODAS as chaves do objeto principal no final. É ESTRITAMENTE PROIBIDO usar formatação markdown (como ```json), apresentar raciocínio passo a passo (Chain of Thought), adicionar texto explicativo ou incluir comentários (como // ou /*) dentro do JSON."
 )
 
 PROMPT_2 = (
@@ -122,7 +134,8 @@ PROMPT_2 = (
     "      \"pk\": [\"m\"]\n"
     "    }\n"
     "  }\n"
-    "}"
+    "}\n\n"
+    "INSTRUÇÃO CRÍTICA: A sua resposta DEVE ser APENAS um objeto JSON válido e nada mais. O PRIMEIRO caractere da sua resposta deve ser '{' e o ÚLTIMO caractere deve ser '}'. É ESTRITAMENTE PROIBIDO usar formatação markdown (como ```json) ou adicionar texto explicativo."
 )
 
 PROMPTS = {
@@ -139,7 +152,6 @@ def carregar_imagem_base64(caminho):
         return base64.b64encode(img_file.read()).decode("utf-8")
 
 def infer_openrouter(model_name, prompt_text, image_b64):
-    from openai import OpenAI
     
     api_key = os.getenv("OPEN_ROUTER_TOKEN")
     if not api_key:
@@ -155,7 +167,7 @@ def infer_openrouter(model_name, prompt_text, image_b64):
         messages=[
             {
                 "role": "system",
-                "content": "Você é um assistente especialista em banco de dados relacionais e transformação de diagramas ER para modelo lógico."
+                "content": "Você é um assistente especialista em banco de dados relacionais e transformação de diagramas ER para modelo lógico. Você NÃO PODE explicar seu raciocínio. Sua única saída deve ser um objeto JSON."
             },
             {
                 "role": "user",
@@ -174,20 +186,21 @@ def infer_openrouter(model_name, prompt_text, image_b64):
             }
         ],
         temperature=0,
-        max_tokens=2000
+        max_tokens=4000
     )
     
     return response.choices[0].message.content
 
 def infer_replicate(model_name, prompt_text, image_path):
-    import replicate
     
     if not os.getenv("REPLICATE_API_TOKEN"):
         raise ValueError("Variável REPLICATE_API_TOKEN não encontrada.")
     
     input_data = {
         "image": open(image_path, "rb"),
-        "prompt": prompt_text
+        "prompt": prompt_text,
+        "temperature": 0, 
+        "max_tokens": 4000
     }
     
     output = replicate.run(model_name, input=input_data)
@@ -198,6 +211,25 @@ def infer_replicate(model_name, prompt_text, image_path):
 # PIPELINE PRINCIPAL
 # =====================
 
+def clean_json_output(content):
+    import re
+    # Primeiro tenta extrair blocos markdown
+    match = re.search(r'```(?:json)?\s*(.*?)\s*```', content, re.DOTALL | re.IGNORECASE)
+    if match:
+        content = match.group(1)
+    
+    # Fallback: Extrai o que está entre as chaves principais
+    start = content.find('{')
+    end = content.rfind('}')
+    if start != -1 and end != -1:
+        content = content[start:end+1]
+        
+    # Remove comentários (// ou /* */) injetados pelo modelo, pois invalidam o JSON nativo do Python
+    content = re.sub(r'//.*', '', content)
+    content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+        
+    return content
+
 def save_result(model_name, prompt_name, content):
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
@@ -206,42 +238,76 @@ def save_result(model_name, prompt_name, content):
     filename = f"{safe_model_name}_{prompt_name}.json"
     filepath = os.path.join(OUTPUT_DIR, filename)
     
-    # Adicionamos a tag markdown para o JSON ou salvamos o texto raw caso o LLM não resgate perfeitamente formatado.
+    # Higienização forte antes de salvar no disco
+    clean_content = clean_json_output(content)
+    
     with open(filepath, "w", encoding="utf-8") as f:
-        f.write(content)
+        f.write(clean_content)
         
     print(f"[OK] Resultado salvo: {filepath}")
 
 def main():
+    parser = argparse.ArgumentParser(description="Benchmark ER Extraction")
+    parser.add_argument("--dry-run", action="store_true", help="Executa o pipeline simulando as chamadas de API")
+    parser.add_argument("--skip-openrouter", action="store_true", help="Pula a execução dos modelos do OpenRouter")
+    parser.add_argument("--skip-replicate", action="store_true", help="Pula a execução dos modelos do Replicate")
+    parser.add_argument("--model", type=str, help="Executa apenas o modelo que contenha este texto (ex: 'qwen', 'llama')")
+    args = parser.parse_args()
+
     if not os.path.exists(IMAGE_PATH):
         print(f"[ERRO] Imagem {IMAGE_PATH} não encontrada.")
         return
 
-    print(f"=== Iniciando Benchmark de Extração ER ({IMAGE_PATH}) ===")
+    dry_run_msg = " (DRY RUN ATIVADO)" if args.dry_run else ""
+    print(f"=== Iniciando Benchmark de Extração ER ({IMAGE_PATH}){dry_run_msg} ===")
     
     image_b64 = carregar_imagem_base64(IMAGE_PATH)
     
     # 1. Executando Modelos via OpenRouter
-    for model in OPENROUTER_MODELS:
-        for prompt_name, prompt_text in PROMPTS.items():
-            print(f"\n-> Processando [OpenRouter] Modelo: {model} | Prompt: {prompt_name}")
-            try:
-                resultado = infer_openrouter(model, prompt_text, image_b64)
-                save_result(model, prompt_name, resultado)
-                time.sleep(2) # Pausa pequena entre requests
-            except Exception as e:
-                print(f"[ERRO] Falha no OpenRouter ({model}): {e}")
+    if not args.skip_openrouter:
+        for model in OPENROUTER_MODELS:
+            if args.model and args.model.lower() not in model.lower():
+                continue
+            for prompt_name, prompt_text in PROMPTS.items():
+                print(f"\n-> Processando [OpenRouter] Modelo: {model} | Prompt: {prompt_name}")
+                try:
+                    if args.dry_run:
+                        print("   [DRY RUN] Simulando inferência (API não chamada).")
+                        resultado = '{\n  "Entities": {\n    "DRY_RUN_MOCK": {\n      "attributes": ["mock_attr"],\n      "pk": ["mock_attr"]\n    }\n  }\n}'
+                    else:
+                        resultado = infer_openrouter(model, prompt_text, image_b64)
+                    
+                    save_result(model, prompt_name, resultado)
+                    
+                    if not args.dry_run:
+                        time.sleep(2) # Pausa pequena entre requests apenas se não for dry run
+                except Exception as e:
+                    print(f"[ERRO] Falha no OpenRouter ({model}): {e}")
+    else:
+        print("\n[INFO] Pulando execução via OpenRouter (--skip-openrouter).")
 
     # 2. Executando Modelos via Replicate
-    for model in REPLICATE_MODELS:
-        for prompt_name, prompt_text in PROMPTS.items():
-            print(f"\n-> Processando [Replicate] Modelo: {model} | Prompt: {prompt_name}")
-            try:
-                resultado = infer_replicate(model, prompt_text, IMAGE_PATH)
-                save_result(model, prompt_name, resultado)
-                time.sleep(2)
-            except Exception as e:
-                print(f"[ERRO] Falha no Replicate ({model}): {e}")
+    if not args.skip_replicate:
+        for model in REPLICATE_MODELS:
+            if args.model and args.model.lower() not in model.lower():
+                continue
+            for prompt_name, prompt_text in PROMPTS.items():
+                print(f"\n-> Processando [Replicate] Modelo: {model} | Prompt: {prompt_name}")
+                try:
+                    if args.dry_run:
+                        print("   [DRY RUN] Simulando inferência (API não chamada).")
+                        resultado = '{\n  "Entities": {\n    "DRY_RUN_MOCK": {\n      "attributes": ["mock_attr"],\n      "pk": ["mock_attr"]\n    }\n  }\n}'
+                    else:
+                        resultado = infer_replicate(model, prompt_text, IMAGE_PATH)
+                    
+                    save_result(model, prompt_name, resultado)
+                    
+                    if not args.dry_run:
+                        time.sleep(2)
+                except Exception as e:
+                    print(f"[ERRO] Falha no Replicate ({model}): {e}")
+    else:
+        print("\n[INFO] Pulando execução via Replicate (--skip-replicate).")
                 
     print("\n=== Benchmark Concluído! ===")
 
