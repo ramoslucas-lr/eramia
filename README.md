@@ -11,8 +11,8 @@ A análise acadêmica aprofundada, contemplando a "Saturação de Contexto", tab
 ## 📁 Estrutura do Repositório
 
 * `benchmark_er.py`: Script principal de inferência unificada. Orquestra as chamadas para as APIs do **OpenRouter** e **Replicate**.
-* `evaluator.py`: Avaliador **Sintático**. Ferramenta de auditoria rigorosa que exige correspondência literal de *strings* via Jaccard Index.
-* `evaluator_hudson.py`: Avaliador **Semântico**. Emula a correção humana do estudo de base, aplicando tolerância via *Regex* para variações lógicas de nomenclatura.
+* `evaluator_syntactic.py`: Avaliador **Sintático**. Ferramenta de auditoria rigorosa que exige correspondência literal de *strings* via Jaccard Index.
+* `evaluator_semantic.py`: Avaliador **Semântico**. Emula a correção humana do estudo de base, aplicando tolerância via *Regex* para variações lógicas de nomenclatura.
 * `data/`: Contém os artefatos de entrada, como a imagem de referência `Company Schema` (Elmasri & Navathe, 2015).
 * `docs/`: Documentação e artigos científicos formatados em Markdown.
 * `notebooks/`: Cadernos de experimentação iterativa e arquivos legados.
@@ -41,10 +41,10 @@ Com os JSONs gerados, você pode avaliar a exatidão estrutural das respostas so
 
 **Avaliação Sintática de Máquina (Rigorosa)**:
 ```bash
-python3 evaluator.py
+python3 evaluator_syntactic.py
 ```
 
 **Avaliação Semântica (Tolerante - Método original)**:
 ```bash
-python3 evaluator_hudson.py
+python3 evaluator_semantic.py
 ```
