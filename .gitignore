@@ -1,0 +1,26 @@
+# Ambientes Virtuais e Dependências
+venv/
+.venv/
+env/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Variáveis de Ambiente (CRÍTICO: Não comitar chaves de API!)
+.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Ferramentas e IDEs
+.vscode/
+.idea/
+.pytest_cache/
+
+artigos/
